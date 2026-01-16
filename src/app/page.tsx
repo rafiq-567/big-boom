@@ -1,15 +1,14 @@
-
-import Features from "@/components/pages/home/Features";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 export default function Home() {
   return (
-    <div>
-      <Features></Features>
+    <main className="min-h-screen bg-gray-50 py-10">
+      
       Hello World!
       <Button>Click Me</Button>
+      
      
-    </div>
+    </main>
   );
 }
