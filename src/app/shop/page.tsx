@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { db } from "@/lib/db"; // আপনার ডাটাবেস কানেকশন ইম্পোর্ট করুন
 
 export default async function ShopPage() {
