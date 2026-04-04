@@ -5,11 +5,12 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const item = await db.product.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         createdBy: { select: { id: true, name: true, email: true } },
         reviews: {
@@ -22,12 +23,11 @@ export async function GET(
       },
     });
 
-    if (!item) {
+    if (!item)
       return NextResponse.json(
         { success: false, message: "Product not found" },
         { status: 404 }
       );
-    }
 
     return NextResponse.json({
       success: true,
@@ -45,22 +45,22 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
-    if (!session || (session.user as any)?.role !== "ADMIN") {
+    if (!session || (session.user as any)?.role !== "ADMIN")
       return NextResponse.json(
         { success: false, message: "Forbidden" },
         { status: 403 }
       );
-    }
 
     const body = await req.json();
 
     const item = await db.product.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(body.name && { name: body.name }),
         ...(body.description && { description: body.description }),
@@ -89,19 +89,19 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
-    if (!session || (session.user as any)?.role !== "ADMIN") {
+    if (!session || (session.user as any)?.role !== "ADMIN")
       return NextResponse.json(
         { success: false, message: "Forbidden" },
         { status: 403 }
       );
-    }
 
-    await db.product.delete({ where: { id: params.id } });
+    await db.product.delete({ where: { id } });
 
     return NextResponse.json({
       success: true,
