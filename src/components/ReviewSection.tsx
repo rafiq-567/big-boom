@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Star, Trash2 } from "lucide-react";
+import { Star, Trash2, Sparkles, Loader2 } from "lucide-react";
 
 interface Review {
   id: string;
@@ -31,6 +31,35 @@ export default function ReviewSection({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [hovered, setHovered] = useState(0);
+  const [aiSummary, setAiSummary] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+
+  const handleAISummary = async () => {
+    if (reviews.length === 0) return;
+    setAiLoading(true);
+    setShowSummary(true);
+
+    try {
+      const res = await fetch("/api/ai/review-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reviews: reviews.map((r) => ({
+            rating: r.rating,
+            comment: r.comment,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+      setAiSummary(data.data?.summary || "Could not generate summary.");
+    } catch {
+      setAiSummary("AI service unavailable. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +83,8 @@ export default function ReviewSection({
       setReviews([data.data, ...reviews]);
       setComment("");
       setRating(5);
+      setAiSummary("");
+      setShowSummary(false);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -71,6 +102,8 @@ export default function ReviewSection({
 
       if (res.ok) {
         setReviews(reviews.filter((r) => r.id !== reviewId));
+        setAiSummary("");
+        setShowSummary(false);
       }
     } catch {
       alert("Failed to delete review");
@@ -79,14 +112,80 @@ export default function ReviewSection({
 
   const userId = session?.user?.id;
   const isAdmin = session?.user?.role === "ADMIN";
+  const avgRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
 
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-bold mb-8">
-        Reviews ({reviews.length})
-      </h2>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h2 className="text-2xl font-bold">
+            Reviews ({reviews.length})
+          </h2>
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-2 mt-1">
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-4 h-4 ${
+                      star <= Math.round(avgRating)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-200"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-sm text-gray-500">
+                {avgRating.toFixed(1)} out of 5
+              </span>
+            </div>
+          )}
+        </div>
 
-      {/* Write Review */}
+        {/* AI Summary Button */}
+        {reviews.length > 0 && (
+          <button
+            onClick={handleAISummary}
+            disabled={aiLoading}
+            className="flex items-center gap-2 bg-yellow-50 text-yellow-700 border border-yellow-300 px-4 py-2 rounded-xl hover:bg-yellow-100 transition text-sm font-medium disabled:opacity-50"
+          >
+            {aiLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
+            {aiLoading ? "Analyzing..." : "AI Summary"}
+          </button>
+        )}
+      </div>
+
+      {/* AI Summary Box */}
+      {showSummary && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-4 h-4 text-yellow-600" />
+            <span className="text-sm font-semibold text-yellow-700">
+              AI Review Summary
+            </span>
+          </div>
+          {aiLoading ? (
+            <div className="flex items-center gap-2 text-yellow-600">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm">Analyzing customer reviews...</span>
+            </div>
+          ) : (
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {aiSummary}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Write Review Form */}
       {session ? (
         <form
           onSubmit={handleSubmit}
@@ -107,7 +206,7 @@ export default function ReviewSection({
                 onClick={() => setRating(star)}
                 onMouseEnter={() => setHovered(star)}
                 onMouseLeave={() => setHovered(0)}
-                className="text-2xl transition-transform hover:scale-110"
+                className="transition-transform hover:scale-110"
               >
                 <Star
                   className={`w-7 h-7 ${
@@ -128,23 +227,33 @@ export default function ReviewSection({
             onChange={(e) => setComment(e.target.value)}
             rows={3}
             required
-            placeholder="Share your experience..."
+            placeholder="Share your experience with this product..."
             className="w-full border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="mt-3 bg-yellow-600 text-white px-6 py-2 rounded-xl hover:bg-yellow-700 transition disabled:opacity-50"
+            className="mt-3 bg-yellow-600 text-white px-6 py-2 rounded-xl hover:bg-yellow-700 transition disabled:opacity-50 flex items-center gap-2"
           >
-            {loading ? "Submitting..." : "Submit Review"}
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              "Submit Review"
+            )}
           </button>
         </form>
       ) : (
         <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-center">
           <p className="text-gray-500">
             Please{" "}
-            <a href="/login" className="text-yellow-600 font-semibold hover:underline">
+            
+              href="/login"
+              className="text-yellow-600 font-semibold hover:underline"
+            >
               login
             </a>{" "}
             to write a review.
@@ -192,7 +301,6 @@ export default function ReviewSection({
                     </span>
                   </div>
 
-                  {/* Delete button */}
                   {(userId === review.user.id || isAdmin) && (
                     <button
                       onClick={() => handleDelete(review.id)}
@@ -203,7 +311,6 @@ export default function ReviewSection({
                   )}
                 </div>
 
-                {/* Stars */}
                 <div className="flex gap-0.5 mb-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
@@ -217,7 +324,9 @@ export default function ReviewSection({
                   ))}
                 </div>
 
-                <p className="text-gray-600 text-sm">{review.comment}</p>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {review.comment}
+                </p>
               </div>
             </div>
           ))}
