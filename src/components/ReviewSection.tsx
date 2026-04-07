@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Star, Trash2, Sparkles, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface Review {
   id: string;
@@ -248,16 +249,16 @@ export default function ReviewSection({
         </form>
       ) : (
         <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-center">
-          <p className="text-gray-500">
-            Please{" "}
-            
-              href="/login"
-              className="text-yellow-600 font-semibold hover:underline"
-            >
-              login
-            </a>{" "}
-            to write a review.
-          </p>
+        <p className="text-gray-500">
+  Please{" "}
+  <Link
+    href="/login"
+    className="text-yellow-600 font-semibold hover:underline"
+  >
+    login
+  </Link>{" "}
+  to write a review.
+</p>
         </div>
       )}
 
