@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `Write a compelling 2-3 sentence product description for a furniture item.
 Product Name: ${name}
