@@ -10,14 +10,16 @@ export default function AddFurnitureForm() {
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [description, setDescription] = useState("");
   const [name, setName] = useState("");
   const [category, setCategory] = useState("Sofa");
   const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleAIGenerate = async () => {
-    if (!name) {
-      setError("Please enter a product name first to generate description.");
+    if (!name.trim()) {
+      setError("Please enter a product name first.");
       return;
     }
     setAiLoading(true);
@@ -33,13 +35,13 @@ export default function AddFurnitureForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "AI generation failed");
+        setError(data.message || "AI generation failed.");
         return;
       }
 
       setDescription(data.data.description);
     } catch {
-      setError("AI service unavailable. Please try again.");
+      setError("AI service unavailable. Please write description manually.");
     } finally {
       setAiLoading(false);
     }
@@ -51,15 +53,13 @@ export default function AddFurnitureForm() {
     setError("");
     setSuccess("");
 
-    const formData = new FormData(e.currentTarget);
-
     const body = {
-      name: formData.get("name") as string,
-      description: description || (formData.get("description") as string),
-      category: formData.get("category") as string,
-      price: formData.get("price") as string,
-      stock: formData.get("stock") as string,
-      location: (formData.get("location") as string) || "",
+      name,
+      description,
+      category,
+      price,
+      stock,
+      location: location || "",
       images: [],
       isFeatured: false,
     };
@@ -82,8 +82,9 @@ export default function AddFurnitureForm() {
       setName("");
       setDescription("");
       setPrice("");
+      setStock("");
+      setLocation("");
       setCategory("Sofa");
-      (e.target as HTMLFormElement).reset();
       router.refresh();
     } catch {
       setError("Network error. Please try again.");
@@ -94,9 +95,12 @@ export default function AddFurnitureForm() {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-100 mt-10">
-      <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+      <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
         <PlusCircle className="w-6 h-6" /> Add New Furniture
       </h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Fill in the details. Use AI to auto-generate a description.
+      </p>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
@@ -110,126 +114,128 @@ export default function AddFurnitureForm() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Product Name
+            Product Name <span className="text-red-500">*</span>
           </label>
           <input
-            name="name"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-yellow-500 outline-none"
-            placeholder="E.g. Luxury Sofa"
+            className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none text-sm"
+            placeholder="E.g. Luxury Velvet Sofa"
           />
         </div>
 
-        {/* Category */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Category
+            Category <span className="text-red-500">*</span>
           </label>
           <select
-            name="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-yellow-500"
+            className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
           >
             <option value="Sofa">Sofa</option>
             <option value="Bed">Bed</option>
             <option value="Table">Table</option>
             <option value="Chair">Chair</option>
             <option value="Wardrobe">Wardrobe</option>
+            <option value="Shelf">Shelf</option>
+            <option value="Desk">Desk</option>
           </select>
         </div>
 
-        {/* Price */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Price ($)
+            Price ($) <span className="text-red-500">*</span>
           </label>
           <input
-            name="price"
             type="number"
             step="0.01"
             min="0"
             required
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-yellow-500"
+            className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
             placeholder="0.00"
           />
         </div>
 
-        {/* Stock */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Stock
+            Stock <span className="text-red-500">*</span>
           </label>
           <input
-            name="stock"
             type="number"
             min="0"
             required
-            className="w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-yellow-500"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+            className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
             placeholder="0"
           />
         </div>
 
-        {/* Location */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Location
           </label>
           <input
-            name="location"
-            className="w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-yellow-500"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
             placeholder="E.g. Dhaka"
           />
         </div>
 
-        {/* Description with AI Button */}
+        {/* Description with AI Generate button */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="block text-sm font-medium text-gray-700">
-              Description
+              Description <span className="text-red-500">*</span>
             </label>
             <button
               type="button"
               onClick={handleAIGenerate}
               disabled={aiLoading}
-              className="flex items-center gap-1 text-xs bg-yellow-50 text-yellow-700 border border-yellow-300 px-2 py-1 rounded-lg hover:bg-yellow-100 transition disabled:opacity-50"
+              className="flex items-center gap-1.5 text-xs bg-yellow-50 text-yellow-700 border border-yellow-300 px-3 py-1.5 rounded-lg hover:bg-yellow-100 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               {aiLoading ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Generating...
+                </>
               ) : (
-                <Sparkles className="w-3 h-3" />
+                <>
+                  <Sparkles className="w-3 h-3" />
+                  AI Generate
+                </>
               )}
-              {aiLoading ? "Generating..." : "AI Generate"}
             </button>
           </div>
+
           <textarea
-            name="description"
             rows={4}
             required
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
-            placeholder="Describe the furniture or click AI Generate..."
+            className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 resize-none text-sm"
+            placeholder="Describe the furniture or click AI Generate above..."
           />
-          {description && (
+
+          {description && !aiLoading && (
             <p className="text-xs text-yellow-600 mt-1 flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              AI generated — feel free to edit
+              AI generated — feel free to edit before saving
             </p>
           )}
         </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          disabled={loading || !name || !description || !price || !stock}
+          className="w-full bg-black text-white py-2.5 rounded-lg hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm font-medium"
         >
           {loading ? (
             <>
