@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `You are a helpful assistant for BigBoom, a premium furniture e-commerce store in Bangladesh.
 Help users with furniture recommendations, room decoration tips, style advice, material questions, and shopping guidance.
