@@ -1,12 +1,71 @@
 import Link from "next/link";
-import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
+
+const socials = [
+  { label: "Facebook", icon: Facebook },
+  { label: "Instagram", icon: Instagram },
+  { label: "Twitter", icon: Twitter },
+  { label: "Youtube", icon: Youtube },
+];
+
+const quickLinks = [
+  { label: "Home", href: "/" },
+  { label: "Shop", href: "/shop" },
+  { label: "Categories", href: "/categories" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];
+
+const shopCategories = [
+  { label: "Sofas", href: "/shop?category=Sofa" },
+  { label: "Beds", href: "/shop?category=Bed" },
+  { label: "Tables", href: "/shop?category=Table" },
+  { label: "Chairs", href: "/shop?category=Chair" },
+  { label: "Wardrobes", href: "/shop?category=Wardrobe" },
+  { label: "Desks", href: "/shop?category=Desk" },
+];
+
+const contactInfo = [
+  { icon: MapPin, text: "123 Furniture Street, Gulshan-2, Dhaka 1212" },
+  { icon: Phone, text: "+880 1700-123456" },
+  { icon: Mail, text: "hello@bigboom.com" },
+];
+
+function SocialIcon({ label, icon: Icon }: { label: string; icon: any }) {
+  return (
+    <Link
+      href="#"
+      aria-label={label}
+      className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-yellow-600 transition"
+    >
+      <Icon className="w-4 h-4" />
+    </Link>
+  );
+}
+
+function ContactItem({ icon: Icon, text }: { icon: any; text: string }) {
+  return (
+    <li className="flex gap-3 text-sm text-gray-400">
+      <Icon className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+      <span>{text}</span>
+    </li>
+  );
+}
 
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
-      {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
           {/* Brand */}
           <div>
             <Link href="/" className="text-2xl font-bold text-yellow-500">
@@ -17,19 +76,8 @@ export default function Footer() {
               exceptional design, delivered to your door.
             </p>
             <div className="flex gap-3 mt-5">
-              {[
-                { icon: Facebook, href: "#" },
-                { icon: Instagram, href: "#" },
-                { icon: Twitter, href: "#" },
-                { icon: Youtube, href: "#" },
-              ].map(({ icon: Icon, href }) => (
-                
-                  key={href}
-                  href={href}
-                  className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-yellow-600 transition"
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
+              {socials.map((s) => (
+                <SocialIcon key={s.label} label={s.label} icon={s.icon} />
               ))}
             </div>
           </div>
@@ -38,14 +86,8 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2.5">
-              {[
-                { label: "Home", href: "/" },
-                { label: "Shop", href: "/shop" },
-                { label: "Categories", href: "/categories" },
-                { label: "About Us", href: "/about" },
-                { label: "Contact", href: "/contact" },
-              ].map((link) => (
-                <li key={link.href}>
+              {quickLinks.map((link) => (
+                <li key={link.label}>
                   <Link
                     href={link.href}
                     className="text-sm text-gray-400 hover:text-yellow-500 transition"
@@ -61,18 +103,16 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4">Categories</h3>
             <ul className="space-y-2.5">
-              {["Sofas", "Beds", "Tables", "Chairs", "Wardrobes", "Desks"].map(
-                (cat) => (
-                  <li key={cat}>
-                    <Link
-                      href={`/shop?category=${cat.slice(0, -1)}`}
-                      className="text-sm text-gray-400 hover:text-yellow-500 transition"
-                    >
-                      {cat}
-                    </Link>
-                  </li>
-                )
-              )}
+              {shopCategories.map((cat) => (
+                <li key={cat.label}>
+                  <Link
+                    href={cat.href}
+                    className="text-sm text-gray-400 hover:text-yellow-500 transition"
+                  >
+                    {cat.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -80,20 +120,12 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4">Contact Us</h3>
             <ul className="space-y-3">
-              <li className="flex gap-3 text-sm text-gray-400">
-                <MapPin className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
-                123 Furniture Street, Gulshan-2, Dhaka 1212
-              </li>
-              <li className="flex gap-3 text-sm text-gray-400">
-                <Phone className="w-4 h-4 text-yellow-500 flex-shrink-0" />
-                +880 1700-123456
-              </li>
-              <li className="flex gap-3 text-sm text-gray-400">
-                <Mail className="w-4 h-4 text-yellow-500 flex-shrink-0" />
-                hello@bigboom.com
-              </li>
+              {contactInfo.map((item) => (
+                <ContactItem key={item.text} icon={item.icon} text={item.text} />
+              ))}
             </ul>
           </div>
+
         </div>
       </div>
 

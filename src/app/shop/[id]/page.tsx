@@ -210,18 +210,28 @@ function BookingForm({ productId }: { productId: string }) {
           "@/app/api/auth/[...nextauth]/route"
         );
 
-        const session = await getServerSession(authOptions);
-        if (!session) redirect("/login");
+       const session = await getServerSession(authOptions);
 
-        const quantity = parseInt(formData.get("quantity") as string);
-        const product = await db.product.findUnique({
-          where: { id: productId },
-        });
-        if (!product) return;
+if (!session || !session.user) {
+  redirect("/login");
+  return;
+}
+
+const userId = (session.user as any).id as string;
+if (!userId) {
+  redirect("/login");
+  return;
+}
+
+const quantity = parseInt(formData.get("quantity") as string);
+const product = await db.product.findUnique({
+  where: { id: productId },
+});
+if (!product) return;
 
         await db.booking.create({
           data: {
-            userId: (session.user as any).id,
+            userId,
             productId,
             quantity,
             price: product.price * quantity,
