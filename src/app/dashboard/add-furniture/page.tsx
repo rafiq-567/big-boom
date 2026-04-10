@@ -7,12 +7,7 @@ export default function AddFurniturePage() {
     <div className="min-h-screen bg-gray-50 p-6 md:p-10">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-black transition mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-          </Link>
+       
 
           <h1 className="text-3xl font-bold text-gray-900">
             Add New Product
