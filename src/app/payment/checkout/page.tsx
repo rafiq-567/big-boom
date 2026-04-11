@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, CreditCard, Lock, CheckCircle } from "lucide-react";
+import { Loader2, CreditCard, Lock } from "lucide-react";
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = searchParams.get("bookingId");
@@ -22,21 +22,20 @@ export default function CheckoutPage() {
     return value
       .replace(/\D/g, "")
       .slice(0, 16)
-      .replace(/(.{4})/g, "$1 ")
+      .replace(/(\d{4})/g, "$1 ")
       .trim();
   };
 
   const formatExpiry = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .slice(0, 4)
-      .replace(/(.{2})/, "$1/");
+    const digits = value.replace(/\D/g, "").slice(0, 4);
+    if (digits.length >= 2) {
+      return digits.slice(0, 2) + "/" + digits.slice(2);
+    }
+    return digits;
   };
 
   const handlePayment = async (success: boolean) => {
     setLoading(true);
-
-    // Simulate payment processing delay
     await new Promise((r) => setTimeout(r, 2000));
 
     try {
@@ -89,7 +88,9 @@ export default function CheckoutPage() {
           <h3 className="font-semibold text-gray-900 mb-3">Order Summary</h3>
           <div className="flex justify-between text-sm text-gray-600 mb-2">
             <span>{productName}</span>
-            <span className="font-semibold">${Number(amount).toFixed(2)}</span>
+            <span className="font-semibold">
+              ${Number(amount).toFixed(2)}
+            </span>
           </div>
           <div className="flex justify-between text-sm text-gray-600 mb-2">
             <span>Delivery</span>
@@ -103,9 +104,11 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Payment Method Tabs */}
+        {/* Payment Methods */}
         <div className="bg-white rounded-2xl border p-5 mb-4">
-          <h3 className="font-semibold text-gray-900 mb-4">Payment Method</h3>
+          <h3 className="font-semibold text-gray-900 mb-4">
+            Payment Method
+          </h3>
 
           <div className="grid grid-cols-3 gap-2 mb-5">
             {[
@@ -161,13 +164,11 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Expiry Date
+                    Expiry
                   </label>
                   <input
                     value={expiry}
-                    onChange={(e) =>
-                      setExpiry(formatExpiry(e.target.value))
-                    }
+                    onChange={(e) => setExpiry(formatExpiry(e.target.value))}
                     placeholder="MM/YY"
                     maxLength={5}
                     className="w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
@@ -191,7 +192,7 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          {/* bKash Form */}
+          {/* bKash */}
           {paymentMethod === "bkash" && (
             <div className="space-y-3">
               <div className="bg-pink-50 rounded-xl p-4 flex items-center gap-3">
@@ -217,7 +218,7 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          {/* Nagad Form */}
+          {/* Nagad */}
           {paymentMethod === "nagad" && (
             <div className="space-y-3">
               <div className="bg-orange-50 rounded-xl p-4 flex items-center gap-3">
@@ -249,7 +250,7 @@ export default function CheckoutPage() {
         {/* Demo Notice */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 text-center">
           <p className="text-xs text-blue-600">
-            🔧 Demo Mode — Use any details to test the payment flow
+            Demo Mode — Use any details to test the payment flow
           </p>
         </div>
 
@@ -272,7 +273,6 @@ export default function CheckoutPage() {
           )}
         </button>
 
-        {/* Cancel Button */}
         <button
           onClick={() => handlePayment(false)}
           disabled={loading}
@@ -282,5 +282,19 @@ export default function CheckoutPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-yellow-600" />
+        </div>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }

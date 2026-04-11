@@ -77,12 +77,13 @@ model Review {
 }
 
 model Booking {
-  id        String        @id @default(cuid())
-  quantity  Int
-  price     Float
-  status    BookingStatus @default(pending)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id            String        @id @default(cuid())
+  quantity      Int
+  price         Float
+  status        BookingStatus @default(pending)
+  transactionId String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   userId    String
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)

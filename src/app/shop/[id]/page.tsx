@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-import Image from "next/image";
+// import Image from "next/image";
 import Link from "next/link";
 import ReviewSection from "@/components/ReviewSection";
 import { getServerSession } from "next-auth";
@@ -11,7 +11,7 @@ export default async function ProductDetailPage({
 }: {
   params: { id: string };
 }) {
-    const { id } = await params;
+  const { id } = await params;
   const product = await db.product.findUnique({
     where: { id },
     include: {
@@ -54,11 +54,10 @@ export default async function ProductDetailPage({
         {/* Image */}
         <div className="relative w-full h-96 rounded-2xl overflow-hidden bg-gray-100">
           {product.images?.[0] ? (
-            <Image
+            <img
               src={product.images[0]}
               alt={product.name}
-              fill
-              className="object-cover"
+              className="w-full h-full object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -137,11 +136,10 @@ export default async function ProductDetailPage({
                 <div className="border rounded-xl overflow-hidden hover:shadow-md transition">
                   <div className="relative w-full h-40 bg-gray-100">
                     {p.images?.[0] ? (
-                      <Image
-                        src={p.images[0]}
-                        alt={p.name}
-                        fill
-                        className="object-cover"
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">
@@ -163,7 +161,6 @@ export default async function ProductDetailPage({
   );
 }
 
-// Booking Button Component
 function BookingButton({
   productId,
   stock,
@@ -194,11 +191,10 @@ function BookingButton({
     );
   }
 
-  return <BookingForm productId={productId} />;
+  return <PaymentForm productId={productId} />;
 }
 
-// Booking Form — client component embedded
-function BookingForm({ productId }: { productId: string }) {
+function PaymentForm({ productId }: { productId: string }) {
   return (
     <form
       action={async (formData: FormData) => {
@@ -210,41 +206,41 @@ function BookingForm({ productId }: { productId: string }) {
           "@/app/api/auth/[...nextauth]/route"
         );
 
-       const session = await getServerSession(authOptions);
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+          redirect("/login");
+          return;
+        }
 
-if (!session || !session.user) {
-  redirect("/login");
-  return;
-}
+        const userId = (session.user as any).id as string;
+        if (!userId) {
+          redirect("/login");
+          return;
+        }
 
-const userId = (session.user as any).id as string;
-if (!userId) {
-  redirect("/login");
-  return;
-}
+        const quantity = parseInt(formData.get("quantity") as string);
+        const product = await db.product.findUnique({
+          where: { id: productId },
+        });
+        if (!product) return;
 
-const quantity = parseInt(formData.get("quantity") as string);
-const product = await db.product.findUnique({
-  where: { id: productId },
-});
-if (!product) return;
+        const totalPrice = product.price * quantity;
+        const transactionId = `TXN-${Date.now()}`;
 
-        await db.booking.create({
+        const booking = await db.booking.create({
           data: {
             userId,
             productId,
             quantity,
-            price: product.price * quantity,
+            price: totalPrice,
             status: "pending",
+            transactionId,
           },
         });
 
-        await db.product.update({
-          where: { id: productId },
-          data: { stock: { decrement: quantity } },
-        });
-
-        redirect("/dashboard/my-orders");
+        redirect(
+          `/payment/checkout?bookingId=${booking.id}&amount=${totalPrice}&productName=${encodeURIComponent(product.name)}`
+        );
       }}
       className="flex gap-3"
     >
@@ -259,7 +255,7 @@ if (!product) return;
         type="submit"
         className="flex-1 bg-yellow-600 text-white py-3 rounded-xl hover:bg-yellow-700 transition font-semibold"
       >
-        Order Now
+        Buy Now
       </button>
     </form>
   );

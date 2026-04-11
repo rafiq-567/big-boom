@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+// import Image from "next/image";
 import { Star, Trash2, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -132,11 +132,10 @@ export default function ReviewSection({
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`w-4 h-4 ${
-                      star <= Math.round(avgRating)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-200"
-                    }`}
+                    className={`w-4 h-4 ${star <= Math.round(avgRating)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-200"
+                      }`}
                   />
                 ))}
               </div>
@@ -210,11 +209,10 @@ export default function ReviewSection({
                 className="transition-transform hover:scale-110"
               >
                 <Star
-                  className={`w-7 h-7 ${
-                    star <= (hovered || rating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
+                  className={`w-7 h-7 ${star <= (hovered || rating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300"
+                    }`}
                 />
               </button>
             ))}
@@ -249,16 +247,16 @@ export default function ReviewSection({
         </form>
       ) : (
         <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-center">
-        <p className="text-gray-500">
-  Please{" "}
-  <Link
-    href="/login"
-    className="text-yellow-600 font-semibold hover:underline"
-  >
-    login
-  </Link>{" "}
-  to write a review.
-</p>
+          <p className="text-gray-500">
+            Please{" "}
+            <Link
+              href="/login"
+              className="text-yellow-600 font-semibold hover:underline"
+            >
+              login
+            </Link>{" "}
+            to write a review.
+          </p>
         </div>
       )}
 
@@ -277,11 +275,10 @@ export default function ReviewSection({
               {/* Avatar */}
               <div className="relative w-10 h-10 rounded-full overflow-hidden bg-yellow-100 flex-shrink-0">
                 {review.user.avatar ? (
-                  <Image
+                  <img
                     src={review.user.avatar}
                     alt={review.user.name || "User"}
-                    fill
-                    className="object-cover"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-yellow-600 font-bold text-sm">
@@ -316,11 +313,10 @@ export default function ReviewSection({
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
-                      className={`w-4 h-4 ${
-                        star <= review.rating
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-200"
-                      }`}
+                      className={`w-4 h-4 ${star <= review.rating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-200"
+                        }`}
                     />
                   ))}
                 </div>
