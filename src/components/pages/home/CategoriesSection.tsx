@@ -62,8 +62,7 @@ export default function CategoriesSection() {
             to match every style and budget.
           </p>
         </div>
-
-        {/* Grid */}
+        
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {categories.map((cat) => (
             <Link key={cat.name} href={cat.href}>
