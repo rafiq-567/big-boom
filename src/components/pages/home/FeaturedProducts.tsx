@@ -21,7 +21,7 @@ export default function FeaturedProducts({
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        {/* Header */}
+  
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
             <span className="text-yellow-600 font-semibold text-sm uppercase tracking-wider">
@@ -42,7 +42,6 @@ export default function FeaturedProducts({
           </Link>
         </div>
 
-        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product) => (
             <div
