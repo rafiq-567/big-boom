@@ -72,7 +72,6 @@ export default function FeaturedProducts({
                 </div>
               </div>
 
-              {/* Info */}
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 truncate mb-1">
                   {product.name}
