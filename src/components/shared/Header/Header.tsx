@@ -33,8 +33,24 @@ const Header = () => {
     { title: "Contact", url: "/contact" },
   ];
 
-  const cartItemsCount = 0;
+  const [cartItemsCount, setCartItemsCount] = useState(0);
   const isAuthenticated = !!session;
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    fetch("/api/cart")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled) {
+          const items = d.data?.items ?? [];
+          const count = items.reduce((s: number, i: any) => s + i.quantity, 0);
+          setCartItemsCount(count);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [isAuthenticated]);
   const isAdmin = (session?.user as any)?.role === "ADMIN";
 
   return (

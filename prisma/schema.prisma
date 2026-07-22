@@ -34,6 +34,7 @@ model User {
   products Product[]
   reviews  Review[]
   bookings Booking[]
+  cart     Cart?
 
   @@map("users")
 }
@@ -55,8 +56,9 @@ model Product {
   createdById String
   createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
-  reviews  Review[]
-  bookings Booking[]
+  reviews   Review[]
+  bookings  Booking[]
+  cartItems CartItem[]
 
   @@map("products")
 }
@@ -74,6 +76,30 @@ model Review {
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
 }
 
 model Booking {

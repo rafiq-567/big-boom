@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-// import Image from "next/image";
 import Link from "next/link";
 import ReviewSection from "@/components/ReviewSection";
+import AddToCartButton from "@/components/AddToCartButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
@@ -196,67 +196,70 @@ function BookingButton({
 
 function PaymentForm({ productId }: { productId: string }) {
   return (
-    <form
-      action={async (formData: FormData) => {
-        "use server";
-        const { redirect } = await import("next/navigation");
-        const { db } = await import("@/lib/db");
-        const { getServerSession } = await import("next-auth");
-        const { authOptions } = await import(
-          "@/app/api/auth/[...nextauth]/route"
-        );
+    <div className="space-y-3">
+      <form
+        action={async (formData: FormData) => {
+          "use server";
+          const { redirect } = await import("next/navigation");
+          const { db } = await import("@/lib/db");
+          const { getServerSession } = await import("next-auth");
+          const { authOptions } = await import(
+            "@/app/api/auth/[...nextauth]/route"
+          );
 
-        const session = await getServerSession(authOptions);
-        if (!session || !session.user) {
-          redirect("/login");
-          return;
-        }
+          const session = await getServerSession(authOptions);
+          if (!session || !session.user) {
+            redirect("/login");
+            return;
+          }
 
-        const userId = (session.user as any).id as string;
-        if (!userId) {
-          redirect("/login");
-          return;
-        }
+          const userId = (session.user as any).id as string;
+          if (!userId) {
+            redirect("/login");
+            return;
+          }
 
-        const quantity = parseInt(formData.get("quantity") as string);
-        const product = await db.product.findUnique({
-          where: { id: productId },
-        });
-        if (!product) return;
+          const quantity = parseInt(formData.get("quantity") as string);
+          const product = await db.product.findUnique({
+            where: { id: productId },
+          });
+          if (!product) return;
 
-        const totalPrice = product.price * quantity;
-        const transactionId = `TXN-${Date.now()}`;
+          const totalPrice = product.price * quantity;
+          const transactionId = `TXN-${Date.now()}`;
 
-        const booking = await db.booking.create({
-          data: {
-            userId,
-            productId,
-            quantity,
-            price: totalPrice,
-            status: "pending",
-            transactionId,
-          },
-        });
+          const booking = await db.booking.create({
+            data: {
+              userId,
+              productId,
+              quantity,
+              price: totalPrice,
+              status: "pending",
+              transactionId,
+            },
+          });
 
-        redirect(
-          `/payment/checkout?bookingId=${booking.id}&amount=${totalPrice}&productName=${encodeURIComponent(product.name)}`
-        );
-      }}
-      className="flex gap-3"
-    >
-      <input
-        type="number"
-        name="quantity"
-        min="1"
-        defaultValue="1"
-        className="w-24 border rounded-xl px-3 py-3 text-center focus:outline-none focus:ring-2 focus:ring-yellow-500"
-      />
-      <button
-        type="submit"
-        className="flex-1 bg-yellow-600 text-white py-3 rounded-xl hover:bg-yellow-700 transition font-semibold"
+          redirect(
+            `/payment/checkout?bookingId=${booking.id}&amount=${totalPrice}&productName=${encodeURIComponent(product.name)}`
+          );
+        }}
+        className="flex gap-3"
       >
-        Buy Now
-      </button>
-    </form>
+        <input
+          type="number"
+          name="quantity"
+          min="1"
+          defaultValue="1"
+          className="w-24 border rounded-xl px-3 py-3 text-center focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        />
+        <button
+          type="submit"
+          className="flex-1 bg-yellow-600 text-white py-3 rounded-xl hover:bg-yellow-700 transition font-semibold"
+        >
+          Buy Now
+        </button>
+      </form>
+      <AddToCartButton productId={productId} />
+    </div>
   );
 }
